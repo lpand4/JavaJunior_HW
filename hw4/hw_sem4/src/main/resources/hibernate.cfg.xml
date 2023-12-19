@@ -5,9 +5,9 @@
     <session-factory>
         <!-- JDBC Database connection settings -->
         <property name="hibernate.connection.driver_class">com.mysql.cj.jdbc.Driver</property>
-        <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/studentsDB</property>
+        <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/SchoolDB</property>
         <property name="hibernate.connection.username">root</property>
-        <property name="hibernate.connection.password">password</property>
+        <property name="hibernate.connection.password">admin</property>
 
         <!-- JDBC connection pool settings -->
         <property name="hibernate.c3p0.min_size">5</property>
@@ -16,8 +16,9 @@
         <property name="hibernate.c3p0.max_statements">50</property>
         <property name="hibernate.c3p0.idle_test_period">3000</property>
 
-        <!-- Specify dialect -->
-        <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
+        <!-- Specify dialect
+        / Изменен на MySQL8Dialect для корректной работы(TYPE=MyISAM - ошибка/ ENGINE=MyISAM - нет ошибки) -->
+        <property name="hibernate.dialect">org.hibernate.dialect.MySQL8Dialect</property>
 
         <!-- Echo all executed SQL to stdout -->
         <property name="hibernate.show_sql">true</property>
@@ -25,11 +26,13 @@
         <!-- Context configuration -->
         <property name="hibernate.current_session_context_class">thread</property>
 
+        <!-- Если таблица была не создана, создает ее по анатациям из класса мэппинга-->
+        <property name="hibernate.hbm2ddl.auto">create</property>
         <!-- Drop and re-create the database schema on startup -->
-        <property name="hibernate.hbm2ddl.auto">update</property>
+        <property name="hbm2ddl.auto">update</property>
 
         <!-- Mention annotated entity class -->
-        <mapping class="ru.geekbrains.lesson4.models.Student"/>
+        <mapping class="ru.javajunior.models.Course"/>
 
     </session-factory>
 </hibernate-configuration>
