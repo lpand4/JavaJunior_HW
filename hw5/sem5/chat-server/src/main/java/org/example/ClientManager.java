@@ -1,5 +1,6 @@
 package org.example;
 
+import java.awt.*;
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -33,13 +34,51 @@ public class ClientManager implements Runnable {
         try {
             while (socket.isConnected()) {
                 msgFromClient = br.readLine();
-                broadcastMessage(msgFromClient);
+                if (isRequestAllClients(msgFromClient)) {
+                    sendListOnlineClients();
+                } else if (isMessageForPersonal(msgFromClient)) {
+                    sendPersonalMessage(msgFromClient);
+                } else {
+                    broadcastMessage(msgFromClient);
+                }
             }
 
         } catch (IOException e) {
             closeEverything(socket, br, bw);
         }
 
+    }
+
+    private void sendListOnlineClients() {
+        StringBuilder sb = new StringBuilder();
+        int counter = 1;
+        for (ClientManager c : clients) {
+            if (!c.equals(this)) {
+                sb.append(counter++).append(". ").append(c.name).append("\n");
+            }
+        }
+        for (ClientManager c : clients) {
+            try {
+                if (c.equals(this)) {
+                    c.bw.write(sb.toString());
+                    c.bw.newLine();
+                    c.bw.flush();
+                }
+            } catch (IOException e) {
+                closeEverything(socket, br, bw);
+                break;
+            }
+        }
+    }
+
+    private boolean isRequestAllClients(String msg) {
+        String[] message = msg.split(": ");
+        return message[1].startsWith("*all");
+    }
+
+    private boolean isMessageForPersonal(String msg) {
+        String[] message = msg.split(": ");
+        return message[1].charAt(0) == '@';
     }
 
     private void closeEverything(Socket socket, BufferedReader br, BufferedWriter bw) {
@@ -76,7 +115,48 @@ public class ClientManager implements Runnable {
                 break;
             }
         }
-
-
     }
+
+    private void sendPersonalMessage(String msg) {
+        String[] msgAndName = parseMessage(msg);
+        boolean isExistPerson = false;
+        try {
+            for (ClientManager c : clients) {
+                if (c.name.equals(msgAndName[0])) {
+                    isExistPerson = true;
+                    c.bw.write(msgAndName[1]);
+                    c.bw.newLine();
+                    c.bw.flush();
+                }
+            }
+            if (!isExistPerson){
+                for (ClientManager c:clients){
+                    if (c.equals(this)){
+                        c.bw.write("Данного пользователя не существует!");
+                        c.bw.newLine();
+                        c.bw.flush();
+                    }
+                }
+            }
+        } catch (IOException e) {
+            closeEverything(socket, br, bw);
+        }
+    }
+
+    private String[] parseMessage(String msg) {
+        StringBuilder sb = new StringBuilder();
+        String[] result = new String[2];
+        String[] temp = msg.split(" ");
+        result[0] = temp[1].substring(1);
+        for (int i = 0; i < temp.length; i++) {
+            if (i != 1) {
+                sb.append(temp[i]);
+            } else {
+                sb.append(" ");
+            }
+        }
+        result[1] = sb.toString();
+        return result;
+    }
+
 }

@@ -60,6 +60,7 @@ public class Client {
         }
     }
 
+
     private void closeEverything(Socket socket, BufferedReader br, BufferedWriter bw) {
         try {
             if (br != null)

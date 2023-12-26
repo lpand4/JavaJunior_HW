@@ -21,6 +21,9 @@ public class Main {
             String remoteIp = inetAddress.getHostAddress();
             System.out.println("Remote IP: " + remoteIp);
             System.out.println("LocalPort: " + socket.getLocalPort());
+            System.out.println("Чтобы увидеть пользователей онлайн напишите *all");
+            System.out.println("Чтобы отправить сообщение определенному пользователю, напишите @Ник");
+
 
             client.listenForMessage();
             client.sendMessage();
